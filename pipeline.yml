@@ -1,0 +1,33 @@
+jobs:
+- name: upload-to-artifactory
+  plan:
+  - task: upload
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source: {repository: byrnedo/alpine-curl}
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          touch gonna-be-in-artifactory.txt
+          echo "hello artifactory" > gonna-be-in-artifactory.txt
+          curl -uadmin:admin -T gonna-be-in-artifactory.txt "http://<ARTIFACTORY_IP>:8081/artifactory/generic-local/gonna-be-in-artifactory.txt"
+
+- name: download-from-artifactory
+  plan:
+  - task: download
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source: {repository: byrnedo/alpine-curl}
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          curl -uadmin:admin -O "http://<ARTIFACTORY_IP>:8081/artifactory/generic-local/gonna-be-in-artifactory.txt"
+          cat gonna-be-in-artifactory.txt
